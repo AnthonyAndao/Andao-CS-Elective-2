@@ -1,10 +1,12 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
+
+bool get isIOS => !kIsWeb && Platform.isIOS;
+bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,258 +15,263 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      home: const FintechHomeScreen(),
+      title: 'Responsive & Adaptive Wireframe Dashboard',
+      theme: ThemeData(useMaterial3: true),
+      home: const DashboardScreen(),
     );
   }
 }
 
-class FintechHomeScreen extends StatelessWidget {
-  const FintechHomeScreen({super.key});
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (isIOS) {
+      return const CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          middle: Text('Dashboard'),
+        ),
+        child: SafeArea(child: _ResponsiveBody()),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
+      appBar: AppBar(title: const Text('Dashboard')),
+      body: const _ResponsiveBody(),
+      floatingActionButton: kIsWeb
+          ? null
+          : FloatingActionButton(
+              onPressed: () {},
+              child: const Icon(Icons.add),
+            ),
+    );
+  }
+}
+
+class _ResponsiveBody extends StatelessWidget {
+  const _ResponsiveBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        if (width < 600) {
+          return const _MobileLayout();
+        } else if (width < 1024) {
+          return const _TabletLayout();
+        } else {
+          return const _DesktopLayout();
+        }
+      },
+    );
+  }
+}
+
+class _MobileLayout extends StatelessWidget {
+  const _MobileLayout();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: const [
+        _WireBox(height: 60),
+        SizedBox(height: 12),
+        _WireBox(height: 60),
+        SizedBox(height: 12),
+        _WireBox(height: 60),
+        SizedBox(height: 20),
+        _WireBox(height: 160),
+        SizedBox(height: 12),
+        _WireBox(height: 100),
+      ],
+    );
+  }
+}
+
+class _TabletLayout extends StatelessWidget {
+  const _TabletLayout();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const _WireSidebar(collapsed: true),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                Positioned(
-                  top: -30,
-                  left: -20,
-                  right: -20,
-                  bottom: -30,
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                    child: Container(
-                      height: 260,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.blueAccent.withValues(alpha: 0.7),
-                            Colors.blueAccent.withValues(alpha: 0.0),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                const Row(
+                  children: [
+                    Expanded(child: _WireBox(height: 90)),
+                    SizedBox(width: 12),
+                    Expanded(child: _WireBox(height: 90)),
+                  ],
                 ),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 32,
-                    horizontal: 20,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF16181F),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(28),
-                      bottomRight: Radius.circular(28),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      // Main profile avatar now uses the uploaded sticker
-                      // instead of the Icons.person placeholder.
-                      const CircleAvatar(
-                        radius: 36,
-                        backgroundColor: Color(0xFF232838),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.blueAccent,
-                          backgroundImage: AssetImage(
-                            'assets/images/profile_main.png',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Johnny Depp',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Rmcx_dn8v87d_ljh8589',
-                            style: TextStyle(color: Colors.grey, fontSize: 13),
-                          ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () {
-                              Clipboard.setData(
-                                const ClipboardData(
-                                  text: 'Rmcx_dn8v87d_ljh8589',
-                                ),
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Copied to clipboard'),
-                                ),
-                              );
-                            },
-                            child: const Icon(
-                              Icons.copy,
-                              size: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
-                      const Text(
-                        'Current Balance',
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '\$98,325',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 231, 229, 229),
-                          fontSize: 30,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    children: const [
+                      _WireBox(),
+                      _WireBox(),
+                      _WireBox(),
+                      _WireBox(),
                     ],
                   ),
                 ),
               ],
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 20,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DesktopLayout extends StatelessWidget {
+  const _DesktopLayout();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const _WireSidebar(collapsed: false),
+        Expanded(
+          flex: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const Row(
                   children: [
-                    const Text(
-                      'Overview',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Each TransactionTile now takes an imagePath and shows
-                    // the corresponding sticker instead of Icons.person.
-                    const TransactionTile(
-                      title: 'Received Money',
-                      date: 'November 02, 2023',
-                      amount: '+ \$213.00',
-                      time: '10:12 PM',
-                      imagePath: 'assets/images/tx_1.png',
-                    ),
-                    const TransactionTile(
-                      title: 'Received Money',
-                      date: 'October 29, 2023',
-                      amount: '+ \$102.00',
-                      time: '10:12 PM',
-                      imagePath: 'assets/images/tx_2.png',
-                    ),
-                    const TransactionTile(
-                      title: 'Received Money',
-                      date: 'October 16, 2023',
-                      amount: '+ \$300.00',
-                      time: '10:12 PM',
-                      imagePath: 'assets/images/tx_3.png',
-                    ),
+                    Expanded(child: _WireBox(height: 100)),
+                    SizedBox(width: 16),
+                    Expanded(child: _WireBox(height: 100)),
+                    SizedBox(width: 16),
+                    Expanded(child: _WireBox(height: 100)),
+                    SizedBox(width: 16),
+                    Expanded(child: _WireBox(height: 100)),
                   ],
                 ),
-              ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView(
+                    children: const [
+                      _WireBox(height: 60),
+                      SizedBox(height: 12),
+                      _WireBox(height: 60),
+                      SizedBox(height: 12),
+                      _WireBox(height: 60),
+                      SizedBox(height: 12),
+                      _WireBox(height: 60),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
+        Expanded(
+          flex: 1,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 24, 24, 24),
+            child: Column(
+              children: const [
+                _WireBox(height: 220),
+                SizedBox(height: 16),
+                _WireBox(height: 140),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WireBox extends StatelessWidget {
+  final double? height;
+
+  const _WireBox({this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = isIOS ? 12.0 : 6.0;
+    final color =
+        isIOS ? CupertinoColors.systemGrey5 : Colors.grey.shade300;
+
+    return Container(
+      height: height,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
       ),
     );
   }
 }
 
-class TransactionTile extends StatelessWidget {
-  final String title;
-  final String date;
-  final String amount;
-  final String time;
-  final String imagePath;
+class _WireSidebar extends StatelessWidget {
+  final bool collapsed;
 
-  const TransactionTile({
-    super.key,
-    required this.title,
-    required this.date,
-    required this.amount,
-    required this.time,
-    required this.imagePath,
-  });
+  const _WireSidebar({required this.collapsed});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
+    final items = [
+      Icons.home,
+      Icons.settings,
+      Icons.info_outline,
+      Icons.logout,
+    ];
+
+    return Container(
+      width: collapsed ? 70 : 220,
+      color: isIOS ? CupertinoColors.systemGrey6 : Colors.grey.shade200,
+      padding: const EdgeInsets.symmetric(
+        vertical: 24,
+        horizontal: 12,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
-            ),
+          Icon(
+            isIOS ? CupertinoIcons.circle_fill : Icons.circle,
+            size: 28,
+            color: Colors.grey.shade600,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 28),
+          for (final icon in items) ...[
+            Row(
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                Icon(
+                  icon,
+                  size: 20,
+                  color: Colors.grey.shade700,
+                ),
+                if (!collapsed) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  date,
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                ),
+                ],
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                time,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
-              ),
-            ],
-          ),
+            const SizedBox(height: 20),
+          ],
         ],
       ),
     );
