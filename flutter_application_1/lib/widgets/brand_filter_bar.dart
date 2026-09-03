@@ -25,31 +25,70 @@ class BrandFilterBar extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 40,
+      height: 56,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         itemCount: brands.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final brand = brands[index];
           final isSelected = brand == selected;
+          final isAll = brand.toLowerCase() == 'all';
 
-          return ChoiceChip(
-            label: Text(brand),
-            selected: isSelected,
-            onSelected: (_) => onSelected(brand),
-            showCheckmark: false,
-            backgroundColor: theme.chipTheme.backgroundColor,
-            selectedColor: theme.colorScheme.primary,
-            labelStyle: theme.chipTheme.labelStyle?.copyWith(
-              color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+          // entrance + subtle slide animation per item
+          return TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 420 + (index * 30)),
+            curve: Curves.easeOut,
+            builder: (context, t, child) {
+              return Transform.translate(
+                offset: Offset(0, (1 - t) * 6),
+                child: AnimatedScale(
+                  scale: isSelected ? 1.04 : 1.0,
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOutBack,
+                  child: child,
+                ),
+              );
+            },
+            child: Material(
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.surfaceVariant.withOpacity(0.95),
+              elevation: isSelected ? 2 : 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: isAll && !isSelected
+                    ? BorderSide(color: theme.colorScheme.primary, width: 1.6)
+                    : (!isSelected
+                        ? BorderSide(
+                            color: theme.colorScheme.outline.withOpacity(0.12))
+                        : BorderSide.none),
+              ),
+              child: InkWell(
+                onTap: () => onSelected(brand),
+                borderRadius: BorderRadius.circular(10),
+                splashFactory: InkRipple.splashFactory,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Center(
+                    child: Text(
+                      brand,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface,
+                        fontWeight:
+                            isSelected ? FontWeight.w800 : FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            side: BorderSide.none,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           );
         },
       ),

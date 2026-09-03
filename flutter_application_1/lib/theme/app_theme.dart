@@ -10,13 +10,12 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // Brand palette — an ink-purple system, not a default Material purple.
-  static const Color _plum900 = Color(0xFF120A1F); // near-black plum (dark bg)
-  static const Color _plum700 = Color(0xFF1E1330); // dark surface
-  static const Color _violet600 = Color(0xFF6C3FC5); // primary brand purple
-  static const Color _violet400 = Color(0xFFA98BF0); // lighter accent (dark mode primary)
-  static const Color _ink900 = Color(0xFF1A1523); // near-black text (light mode)
-  static const Color _sand50 = Color(0xFFF6F3FA); // warm off-white bg (light mode)
+  static const Color _plum900 = Color(0xFF120A1F); 
+  static const Color _plum700 = Color(0xFF1E1330); 
+  static const Color _violet600 = Color(0xFF6C3FC5); 
+  static const Color _violet400 = Color(0xFFA98BF0); 
+  static const Color _ink900 = Color(0xFF1A1523); 
+  static const Color _sand50 = Color(0xFFF6F3FA); 
   static const Color _cardLight = Color(0xFFFFFFFF);
 
   static const String _fontFamily = 'Roboto'; // Flutter default, kept explicit

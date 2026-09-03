@@ -108,120 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // ---- Cleaned Hero Header ----
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.tertiaryContainer,
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.35),
-                    blurRadius: 25,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Top Authenticated Tag
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: theme.colorScheme.onPrimary
-                                  .withOpacity(0.2),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.verified_rounded,
-                                size: 14,
-                                color: theme.colorScheme.onPrimary,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'AUTHENTICATED',
-                                style: TextStyle(
-                                  color: theme.colorScheme.onPrimary,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Title & Subtitle
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Find Your\nNext Pair.',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.w900,
-                            height: 1.05,
-                            letterSpacing: -0.8,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${products.length} exclusive drops available',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onPrimary
-                                .withOpacity(0.85),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Stat Pills
-                    Row(
-                      children: [
-                        _HeroStatPill(
-                          icon: Icons.inventory_2_outlined,
-                          text: '${products.length} Pairs',
-                        ),
-                        const SizedBox(width: 8),
-                        _HeroStatPill(
-                          icon: Icons.sell_outlined,
-                          text: '${availableBrands.length} Brands',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // ---- Enlarged Search Field ----
           SliverToBoxAdapter(
             child: Padding(
@@ -306,35 +192,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ---- Section Header + Result Count ----
+          // ---- Available Pairs & Brands ----
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _selectedBrand == _all ? 'Featured Kicks' : _selectedBrand,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: _SummaryStatCard(
+                      label: 'Available pairs',
+                      value: '${products.length}',
+                      icon: Icons.inventory_2_outlined,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${filtered.length} ${filtered.length == 1 ? 'pair' : 'pairs'}',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _SummaryStatCard(
+                      label: 'Available brands',
+                      value: '${availableBrands.length}',
+                      icon: Icons.sell_outlined,
                     ),
                   ),
                 ],
@@ -404,33 +280,65 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// Compact stat pill widget used within the hero header.
-class _HeroStatPill extends StatelessWidget {
+/// Compact stat card used for the summary counts below the search/filter bar.
+class _SummaryStatCard extends StatelessWidget {
   final IconData icon;
-  final String text;
+  final String label;
+  final String value;
 
-  const _HeroStatPill({required this.icon, required this.text});
+  const _SummaryStatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: theme.colorScheme.onPrimary.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(10),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.12),
+          width: 1,
+        ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: theme.colorScheme.onPrimary),
-          const SizedBox(width: 5),
-          Text(
-            text,
-            style: TextStyle(
-              color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w700,
-              fontSize: 11,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
