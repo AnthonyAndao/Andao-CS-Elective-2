@@ -9,12 +9,6 @@ import '../widgets/product_card.dart';
 
 /// The Home screen: hero header, search, brand filter row, and a
 /// responsive product grid.
-///
-/// This is a [StatefulWidget] because it owns two pieces of mutable state
-/// that drive what gets rendered: `_selectedBrand` and `_searchQuery`.
-/// Both change purely from user interaction (tapping a chip, typing in the
-/// search field) and both need to persist across rebuilds — that's the
-/// textbook case for State rather than Stateless.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -102,7 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.shopping_bag_outlined),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Cart coming in the next milestone')),
+                const SnackBar(
+                  content: Text('Cart coming in the next milestone'),
+                ),
               );
             },
           ),
@@ -112,148 +108,184 @@ class _HomeScreenState extends State<HomeScreen> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // ---- Hero header ----
+          // ---- Cleaned Hero Header ----
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+              height: 200,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(28),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.tertiaryContainer,
+                  ],
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.25),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    color: theme.colorScheme.primary.withOpacity(0.35),
+                    blurRadius: 25,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        theme.colorScheme.primary,
-                        Color.lerp(theme.colorScheme.primary, theme.colorScheme.secondary, 0.4)!,
-                      ],
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: -15,
-                        bottom: -20,
-                        child: Icon(
-                          Icons.shopping_bag_rounded,
-                          size: 130,
-                          color: theme.colorScheme.onPrimary.withOpacity(0.12),
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.onPrimary.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'VERIFIED AUTHENTIC ⚡',
-                              style: TextStyle(
-                                color: theme.colorScheme.onPrimary,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                              ),
+              child: Padding(
+                padding: const EdgeInsets.all(22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Top Authenticated Tag
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: theme.colorScheme.onPrimary
+                                  .withOpacity(0.2),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Grails, verified.',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              color: theme.colorScheme.onPrimary,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Curated pairs from ${availableBrands.join(', ')}.',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onPrimary.withOpacity(0.9),
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          Row(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              _HeroStat(label: 'Pairs', value: '${products.length}'),
-                              const SizedBox(width: 10),
-                              _HeroStat(label: 'Brands', value: '${availableBrands.length}'),
+                              Icon(
+                                Icons.verified_rounded,
+                                size: 14,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'AUTHENTICATED',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
                             ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+
+                    // Title & Subtitle
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Find Your\nNext Pair.',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.w900,
+                            height: 1.05,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${products.length} exclusive drops available',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onPrimary
+                                .withOpacity(0.85),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Stat Pills
+                    Row(
+                      children: [
+                        _HeroStatPill(
+                          icon: Icons.inventory_2_outlined,
+                          text: '${products.length} Pairs',
+                        ),
+                        const SizedBox(width: 8),
+                        _HeroStatPill(
+                          icon: Icons.sell_outlined,
+                          text: '${availableBrands.length} Brands',
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
 
-          // ---- Search field ----
+          // ---- Enlarged Search Field ----
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
                 child: TextField(
                   controller: _searchController,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                   onChanged: (value) => setState(() => _searchQuery = value),
                   decoration: InputDecoration(
                     hintText: 'Search sneakers or brands...',
                     hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
-                      fontSize: 14,
+                      color: theme.colorScheme.onSurface.withOpacity(0.45),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
                     ),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: theme.colorScheme.primary,
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Icon(
+                        Icons.search_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 24,
+                      ),
                     ),
                     suffixIcon: _searchQuery.isEmpty
                         ? null
-                        : IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                            },
+                        : Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 22),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            ),
                           ),
                     filled: true,
                     fillColor: theme.colorScheme.surface,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 18),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
-                        color: theme.colorScheme.primary.withOpacity(0.12),
+                        color: theme.colorScheme.primary.withOpacity(0.15),
+                        width: 1.2,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
                         color: theme.colorScheme.primary,
-                        width: 1.5,
+                        width: 2.0,
                       ),
                     ),
                   ),
@@ -262,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ---- Brand filter row ----
+          // ---- Brand Filter Row ----
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -274,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ---- Section header + result count ----
+          // ---- Section Header + Result Count ----
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
@@ -289,7 +321,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
@@ -307,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ---- Responsive product grid (or empty state) ----
+          // ---- Responsive Product Grid (or empty state) ----
           if (filtered.isEmpty)
             SliverToBoxAdapter(
               child: Padding(
@@ -369,41 +404,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// Small pill used inside the hero banner to show a quick stat
-/// (e.g. "9 Pairs"). Purely presentational — given fixed text, it never
-/// changes on its own, so it's Stateless.
-class _HeroStat extends StatelessWidget {
-  final String label;
-  final String value;
+/// Compact stat pill widget used within the hero header.
+class _HeroStatPill extends StatelessWidget {
+  final IconData icon;
+  final String text;
 
-  const _HeroStat({required this.label, required this.value});
+  const _HeroStatPill({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: theme.colorScheme.onPrimary.withOpacity(0.16),
-        borderRadius: BorderRadius.circular(14),
+        color: theme.colorScheme.onPrimary.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(icon, size: 13, color: theme.colorScheme.onPrimary),
+          const SizedBox(width: 5),
           Text(
-            value,
+            text,
             style: TextStyle(
               color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w800,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: theme.colorScheme.onPrimary.withOpacity(0.85),
-              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
             ),
           ),
         ],
