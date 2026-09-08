@@ -1,0 +1,5 @@
+# Ignore specific PDF exam file
+CS Elective 2 - PRELIM EXAM (1).pdf
+
+# Option to ignore all PDF files (uncomment if desired):
+# *.pdf

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'controllers/cart_controller.dart';
+import 'controllers/cart_scope.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_controller.dart';
@@ -10,9 +12,7 @@ void main() {
 }
 
 /// Root widget. This is a [StatefulWidget] because it owns the
-/// [ThemeController] instance for the whole app's lifetime — that instance
-/// must survive rebuilds, so it's created once in [State.initState] rather
-/// than fresh on every build.
+/// [ThemeController] and [CartController] instances for the whole app's lifetime.
 class SoleMateApp extends StatefulWidget {
   const SoleMateApp({super.key});
 
@@ -22,16 +22,19 @@ class SoleMateApp extends StatefulWidget {
 
 class _SoleMateAppState extends State<SoleMateApp> {
   late final ThemeController _themeController;
+  late final CartController _cartController;
 
   @override
   void initState() {
     super.initState();
     _themeController = ThemeController();
+    _cartController = CartController();
   }
 
   @override
   void dispose() {
     _themeController.dispose();
+    _cartController.dispose();
     super.dispose();
   }
 
@@ -39,19 +42,23 @@ class _SoleMateAppState extends State<SoleMateApp> {
   Widget build(BuildContext context) {
     return ThemeScope(
       controller: _themeController,
-      child: AnimatedBuilder(
-        animation: _themeController,
-        builder: (context, _) {
-          return MaterialApp.router(
-            title: 'SoleMate',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            themeMode: _themeController.mode,
-            routerConfig: appRouter,
-          );
-        },
+      child: CartScope(
+        controller: _cartController,
+        child: AnimatedBuilder(
+          animation: _themeController,
+          builder: (context, _) {
+            return MaterialApp.router(
+              title: 'SoleMate',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: _themeController.mode,
+              routerConfig: appRouter,
+            );
+          },
+        ),
       ),
     );
   }
 }
+

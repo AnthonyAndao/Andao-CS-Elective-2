@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../controllers/cart_scope.dart';
 import '../data/products.dart';
 import '../models/product.dart';
 import '../theme/theme_scope.dart';
@@ -42,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final themeController = ThemeScope.of(context);
+    final cartController = CartScope.of(context);
     final theme = Theme.of(context);
     final brands = [_all, ...availableBrands];
     final filtered = _filteredProducts;
@@ -91,16 +93,40 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             onPressed: themeController.toggle,
           ),
-          IconButton(
-            tooltip: 'Cart',
-            icon: const Icon(Icons.shopping_bag_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Cart coming in the next milestone'),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                tooltip: 'Cart',
+                icon: const Icon(Icons.shopping_bag_outlined),
+                onPressed: () => context.push('/cart'),
+              ),
+              if (cartController.totalItemCount > 0)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      '${cartController.totalItemCount}',
+                      style: TextStyle(
+                        color: theme.colorScheme.onPrimary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
-              );
-            },
+            ],
           ),
           const SizedBox(width: 4),
         ],
