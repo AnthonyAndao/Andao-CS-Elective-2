@@ -18,12 +18,25 @@ class PokeService {
       final data = json.decode(response.body);
       final List results = data['results'] ?? [];
 
-      List<Pokemon> pokemonList = [];
-      for (var item in results) {
-        pokemonList.add(Pokemon.fromJson(item));
-      }
+      return Future.wait(
+        results.map((item) async {
+          final detailUrl = item['url']?.toString();
+          if (detailUrl == null || detailUrl.isEmpty) {
+            throw Exception('Pokémon detail URL is missing.');
+          }
 
-      return pokemonList;
+          final detailResponse = await http.get(Uri.parse(detailUrl));
+          if (detailResponse.statusCode != 200) {
+            throw Exception(
+              'Failed to load details for ${item['name'] ?? 'unknown Pokémon'}. '
+              'Status code: ${detailResponse.statusCode}',
+            );
+          }
+
+          final detailData = json.decode(detailResponse.body) as Map<String, dynamic>;
+          return Pokemon.fromJson(detailData);
+        }),
+      );
     } else {
       throw Exception('Failed to load Pokémon. Status code: ${response.statusCode}');
     }
