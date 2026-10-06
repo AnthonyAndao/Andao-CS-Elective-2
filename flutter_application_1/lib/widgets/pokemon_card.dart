@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 
-class PokemonCard extends StatefulWidget {
+class PokemonCard extends StatelessWidget {
   final Pokemon pokemon;
+  final VoidCallback onTap;
 
-  const PokemonCard({super.key, required this.pokemon});
+  const PokemonCard({
+    super.key,
+    required this.pokemon,
+    required this.onTap,
+  });
 
   static const Map<String, List<Color>> _typeGradients = {
     'normal': [Color(0xFFA8A77A), Color(0xFFCFCDA8)],
@@ -33,203 +38,184 @@ class PokemonCard extends StatefulWidget {
   }
 
   @override
-  State<PokemonCard> createState() => _PokemonCardState();
-}
-
-class _PokemonCardState extends State<PokemonCard> {
-  bool _isHovered = false;
-
-  @override
   Widget build(BuildContext context) {
-    final pokemon = widget.pokemon;
     final formattedId = '#${pokemon.id.toString().padLeft(3, '0')}';
     final capitalizedName = pokemon.name.isEmpty
         ? 'Unknown'
-        : widget._capitalize(pokemon.name);
+        : _capitalize(pokemon.name);
     final primaryType = pokemon.primaryType;
     final typeColors =
-        PokemonCard._typeGradients[primaryType] ??
-        PokemonCard._typeGradients['normal']!;
+        _typeGradients[primaryType] ?? _typeGradients['normal']!;
     final visibleTypes = pokemon.types.take(2).toList();
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOutCubic,
-        scale: _isHovered ? 1.035 : 1.0,
-        child: AnimatedSlide(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          offset: _isHovered ? const Offset(0, -0.04) : Offset.zero,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: typeColors[0].withValues(
-                    alpha: _isHovered ? 0.45 : 0.35,
-                  ),
-                  blurRadius: _isHovered ? 20 : 12,
-                  offset: Offset(0, _isHovered ? 12 : 7),
-                ),
-              ],
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: typeColors[0].withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 7),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          typeColors[0].withValues(alpha: 0.85),
-                          typeColors[1],
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      typeColors[0].withValues(alpha: 0.85),
+                      typeColors[1],
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -22,
+                right: -22,
+                child: Container(
+                  width: 78,
+                  height: 78,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -28,
+                left: -14,
+                child: Icon(
+                  Icons.catching_pokemon,
+                  size: 70,
+                  color: Colors.white.withValues(alpha: 0.14),
+                ),
+              ),
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withValues(alpha: 0.05),
+                        Colors.black.withValues(alpha: 0.28),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
                   ),
-                  Positioned(
-                    top: -22,
-                    right: -22,
-                    child: Container(
-                      width: 78,
-                      height: 78,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -28,
-                    left: -14,
-                    child: Icon(
-                      Icons.catching_pokemon,
-                      size: 70,
-                      color: Colors.white.withValues(alpha: 0.14),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.black.withValues(alpha: 0.05),
-                            Colors.black.withValues(alpha: 0.28),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.26),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              formattedId,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 10,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.26),
+                          borderRadius: BorderRadius.circular(999),
                         ),
-                        Expanded(
-                          child: Image.network(
-                            pokemon.imageUrl,
-                            fit: BoxFit.contain,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.catching_pokemon,
-                                size: 40,
-                                color: Colors.white,
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          capitalizedName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
+                        child: Text(
+                          formattedId,
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
-                            fontSize: 12,
+                            fontSize: 10,
                             color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 8,
-                                color: Colors.black26,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: visibleTypes
-                              .map(
-                                (type) => Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.22),
-                                    borderRadius: BorderRadius.circular(999),
-                                    border: Border.all(color: Colors.white24),
-                                  ),
-                                  child: Text(
-                                    widget._capitalize(type),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 9.5,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Hero(
+                        tag: 'pokemon-image-${pokemon.id}',
+                        child: Image.network(
+                          pokemon.imageUrl,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.catching_pokemon,
+                              size: 40,
+                              color: Colors.white,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      capitalizedName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 8,
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: visibleTypes
+                          .map(
+                            (type) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.22),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(color: Colors.white24),
+                              ),
+                              child: Text(
+                                _capitalize(type),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 9.5,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

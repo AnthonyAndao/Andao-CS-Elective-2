@@ -1,38 +1,16 @@
 import 'package:flutter/material.dart';
-import '../models/pokemon.dart';
-import '../services/poke_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/pokemon_provider.dart';
 import '../widgets/pokemon_card.dart';
+import 'pokemon_detail_screen.dart';
 
-class PokemonGridScreen extends StatefulWidget {
+class PokemonGridScreen extends StatelessWidget {
   const PokemonGridScreen({super.key});
 
   @override
-  State<PokemonGridScreen> createState() => _PokemonGridScreenState();
-}
-
-class _PokemonGridScreenState extends State<PokemonGridScreen> {
-  final PokeService _pokeService = PokeService();
-  late Future<List<Pokemon>> _pokemonFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPokemon();
-  }
-
-  void _loadPokemon() {
-    setState(() {
-      _pokemonFuture = _pokeService.fetch30Pokemon();
-    });
-  }
-
-  Future<void> _refreshPokemon() async {
-    _loadPokemon();
-    await _pokemonFuture;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PokemonProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -64,10 +42,9 @@ class _PokemonGridScreenState extends State<PokemonGridScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: FutureBuilder<List<Pokemon>>(
-          future: _pokemonFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+        child: Builder(
+          builder: (context) {
+            if (provider.isLoading && provider.pokemon.isEmpty) {
               return const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -83,30 +60,34 @@ class _PokemonGridScreenState extends State<PokemonGridScreen> {
               );
             }
 
-            if (snapshot.hasError) {
+            if (provider.errorMessage != null && provider.pokemon.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 60, color: Colors.redAccent),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 60,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'Failed to fetch Pokémon',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${snapshot.error}',
+                        provider.errorMessage!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        onPressed: _loadPokemon,
+                        onPressed: provider.fetchPokemon,
                         icon: const Icon(Icons.refresh),
                         label: const Text('Try Again'),
                         style: ElevatedButton.styleFrom(
@@ -120,8 +101,7 @@ class _PokemonGridScreenState extends State<PokemonGridScreen> {
               );
             }
 
-            final pokemonList = snapshot.data;
-            if (pokemonList == null || pokemonList.isEmpty) {
+            if (provider.pokemon.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -134,7 +114,7 @@ class _PokemonGridScreenState extends State<PokemonGridScreen> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: _loadPokemon,
+                      onPressed: provider.fetchPokemon,
                       child: const Text('Refresh'),
                     ),
                   ],
@@ -143,7 +123,7 @@ class _PokemonGridScreenState extends State<PokemonGridScreen> {
             }
 
             return RefreshIndicator(
-              onRefresh: _refreshPokemon,
+              onRefresh: provider.fetchPokemon,
               color: Colors.redAccent,
               child: GridView.builder(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
@@ -156,9 +136,20 @@ class _PokemonGridScreenState extends State<PokemonGridScreen> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: pokemonList.length,
+                itemCount: provider.pokemon.length,
                 itemBuilder: (context, index) {
-                  return PokemonCard(pokemon: pokemonList[index]);
+                  final pokemon = provider.pokemon[index];
+                  return PokemonCard(
+                    pokemon: pokemon,
+                    onTap: () {
+                      context.read<PokemonProvider>().selectPokemon(pokemon.id);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const PokemonDetailScreen(),
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
             );
