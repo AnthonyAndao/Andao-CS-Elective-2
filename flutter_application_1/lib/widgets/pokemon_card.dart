@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/pokemon.dart';
+import '../providers/pokemon_provider.dart';
 
-class PokemonCard extends StatelessWidget {
+class PokemonCard extends ConsumerWidget {
   final Pokemon pokemon;
   final VoidCallback onTap;
 
@@ -38,14 +40,21 @@ class PokemonCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch only the parts we need so rebuilds are targeted
+    final isFavorite = ref.watch(
+      pokemonProvider.select((s) => s.isFavorite(pokemon.id)),
+    );
+    final nickname = ref.watch(
+      pokemonProvider.select((s) => s.nickname(pokemon.id)),
+    );
+    final notifier = ref.read(pokemonProvider.notifier);
+
     final formattedId = '#${pokemon.id.toString().padLeft(3, '0')}';
-    final capitalizedName = pokemon.name.isEmpty
-        ? 'Unknown'
-        : _capitalize(pokemon.name);
+    final capitalizedName =
+        pokemon.name.isEmpty ? 'Unknown' : _capitalize(pokemon.name);
     final primaryType = pokemon.primaryType;
-    final typeColors =
-        _typeGradients[primaryType] ?? _typeGradients['normal']!;
+    final typeColors = _typeGradients[primaryType] ?? _typeGradients['normal']!;
     final visibleTypes = pokemon.types.take(2).toList();
 
     return GestureDetector(
@@ -67,6 +76,7 @@ class PokemonCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           child: Stack(
             children: [
+              // ── Background gradient ──────────────────────────────────────
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -79,6 +89,7 @@ class PokemonCard extends StatelessWidget {
                   ),
                 ),
               ),
+              // ── Decorative circles / icon ────────────────────────────────
               Positioned(
                 top: -22,
                 right: -22,
@@ -100,6 +111,7 @@ class PokemonCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.14),
                 ),
               ),
+              // ── Overlay vignette ─────────────────────────────────────────
               Positioned.fill(
                 child: Container(
                   decoration: BoxDecoration(
@@ -114,31 +126,55 @@ class PokemonCard extends StatelessWidget {
                   ),
                 ),
               ),
+              // ── Card content ─────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
                 child: Column(
                   children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.26),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          formattedId,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 10,
-                            color: Colors.white,
+                    // Top row: ID badge + heart button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.26),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            formattedId,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
+                        // ── Heart / Favourite toggle ──────────────────────
+                        GestureDetector(
+                          onTap: () => notifier.toggleFavorite(pokemon.id),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            transitionBuilder: (child, animation) =>
+                                ScaleTransition(scale: animation, child: child),
+                            child: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              key: ValueKey(isFavorite),
+                              color: isFavorite
+                                  ? const Color(0xFFFF4C6A)
+                                  : Colors.white70,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    // Pokémon image
                     Expanded(
                       child: Hero(
                         tag: 'pokemon-image-${pokemon.id}',
@@ -164,17 +200,40 @@ class PokemonCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
+                    // ── Nickname (if set) ─────────────────────────────────
+                    if (nickname != null)
+                      Text(
+                        '"$nickname"',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                          color: Color(0xFFFFE57F),
+                          shadows: [
+                            Shadow(
+                              blurRadius: 6,
+                              color: Colors.black26,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    // ── Original name ─────────────────────────────────────
                     Text(
                       capitalizedName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        color: Colors.white,
-                        shadows: [
+                        fontSize: nickname != null ? 10 : 12,
+                        color: nickname != null
+                            ? Colors.white70
+                            : Colors.white,
+                        shadows: const [
                           Shadow(
                             blurRadius: 8,
                             color: Colors.black26,
@@ -184,6 +243,7 @@ class PokemonCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
+                    // ── Type chips ────────────────────────────────────────
                     Wrap(
                       alignment: WrapAlignment.center,
                       spacing: 4,
