@@ -41,7 +41,7 @@ class FruitListScreen extends StatelessWidget {
   const FruitListScreen({super.key});
 
   final List<Map<String, String>> fruits = const [
-    {'name': 'Guava', 'icon': '🍈'},
+    {'name': 'Bayabas', 'icon': '🍈'},
     {'name': 'Saging', 'icon': '🍌'},
     {'name': 'Mangosteen', 'icon': '🫐'},
     {'name': 'Ponkan', 'icon': '🍊'},
