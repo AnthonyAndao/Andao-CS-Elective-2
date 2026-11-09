@@ -22,6 +22,19 @@ class Product {
     required this.description,
   });
 
+  /// Deserialise a row returned by Supabase (snake_case column names).
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id:          json['id']          as String,
+      brand:       json['brand']       as String,
+      name:        json['name']        as String,
+      category:    json['category']    as String,
+      price:       (json['price']      as num).toDouble(),
+      imageUrl:    json['image_url']   as String,
+      description: json['description'] as String,
+    );
+  }
+
   String get formattedPrice => '₱${_withThousandsSeparator(price)}';
 
   static String _withThousandsSeparator(double value) {
