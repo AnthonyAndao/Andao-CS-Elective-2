@@ -3,12 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'screens/cart_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 import 'screens/product_detail_screen.dart';
 
 /// All app routing lives here, in one place, using go_router (Navigation 2.0).
 ///
 /// Registered routes:
 ///   /            -> HomeScreen (product grid)
+///   /login       -> LoginScreen (email/password & 3rd party OAuth)
 ///   /product/:id -> ProductDetailScreen (product info & add to cart)
 ///   /cart        -> CartScreen (cart items & quantity controls)
 ///   /checkout    -> CheckoutScreen (order summary & confirmation)
@@ -19,6 +21,11 @@ final GoRouter appRouter = GoRouter(
       path: '/',
       name: 'home',
       builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      name: 'login',
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/product/:id',

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'controllers/auth_controller.dart';
+import 'controllers/auth_scope.dart';
 import 'controllers/cart_controller.dart';
 import 'controllers/cart_scope.dart';
 import 'controllers/product_controller.dart';
@@ -37,6 +39,7 @@ class _SoleMateAppState extends State<SoleMateApp> {
   late final ThemeController _themeController;
   late final CartController _cartController;
   late final ProductController _productController;
+  late final AuthController _authController;
 
   @override
   void initState() {
@@ -44,6 +47,7 @@ class _SoleMateAppState extends State<SoleMateApp> {
     _themeController = ThemeController();
     _cartController = CartController();
     _productController = ProductController();
+    _authController = AuthController();
   }
 
   @override
@@ -51,6 +55,7 @@ class _SoleMateAppState extends State<SoleMateApp> {
     _themeController.dispose();
     _cartController.dispose();
     _productController.dispose();
+    _authController.dispose();
     super.dispose();
   }
 
@@ -58,22 +63,25 @@ class _SoleMateAppState extends State<SoleMateApp> {
   Widget build(BuildContext context) {
     return ThemeScope(
       controller: _themeController,
-      child: CartScope(
-        controller: _cartController,
-        child: ProductScope(
-          controller: _productController,
-          child: AnimatedBuilder(
-            animation: _themeController,
-            builder: (context, _) {
-              return MaterialApp.router(
-                title: 'SoleMate',
-                debugShowCheckedModeBanner: false,
-                theme: AppTheme.light,
-                darkTheme: AppTheme.dark,
-                themeMode: _themeController.mode,
-                routerConfig: appRouter,
-              );
-            },
+      child: AuthScope(
+        controller: _authController,
+        child: CartScope(
+          controller: _cartController,
+          child: ProductScope(
+            controller: _productController,
+            child: AnimatedBuilder(
+              animation: _themeController,
+              builder: (context, _) {
+                return MaterialApp.router(
+                  title: 'SoleMate',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.light,
+                  darkTheme: AppTheme.dark,
+                  themeMode: _themeController.mode,
+                  routerConfig: appRouter,
+                );
+              },
+            ),
           ),
         ),
       ),

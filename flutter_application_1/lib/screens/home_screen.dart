@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../controllers/auth_controller.dart';
+import '../controllers/auth_scope.dart';
 import '../controllers/cart_scope.dart';
 import '../controllers/product_controller.dart';
 import '../controllers/product_scope.dart';
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final themeController = ThemeScope.of(context);
     final cartController = CartScope.of(context);
+    final authController = AuthScope.of(context);
     final pc = ProductScope.of(context);
     final theme = Theme.of(context);
     final brands = [_all, ...pc.availableBrands];
@@ -118,6 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(width: 4),
+          _UserAuthButton(auth: authController),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
@@ -866,6 +871,196 @@ class _SummaryStatCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// User Auth Button (AppBar)
+// ════════════════════════════════════════════════════════════════════════════
+
+class _UserAuthButton extends StatelessWidget {
+  final AuthController auth;
+
+  const _UserAuthButton({required this.auth});
+
+  void _showUserSheet(BuildContext context) {
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.outline.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                CircleAvatar(
+                  radius: 36,
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+                  backgroundImage: auth.avatarUrl != null
+                      ? NetworkImage(auth.avatarUrl!)
+                      : null,
+                  child: auth.avatarUrl == null
+                      ? Text(
+                          auth.displayName.isNotEmpty
+                              ? auth.displayName[0].toUpperCase()
+                              : 'U',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  auth.displayName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (auth.user?.email != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    auth.user!.email!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.10),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        auth.providerName.toLowerCase() == 'google'
+                            ? Icons.account_circle_rounded
+                            : (auth.providerName.toLowerCase() == 'github'
+                                ? Icons.code_rounded
+                                : Icons.verified_user_outlined),
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Signed in via ${auth.providerName}',
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FilledButton.tonalIcon(
+                  onPressed: () async {
+                    Navigator.of(ctx).pop();
+                    await auth.signOut();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Signed out successfully'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.logout_rounded, size: 18),
+                  label: const Text('Sign Out'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (auth.isAuthenticated) {
+      return GestureDetector(
+        onTap: () => _showUserSheet(context),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: theme.colorScheme.primary.withOpacity(0.4),
+              width: 1.6,
+            ),
+          ),
+          child: CircleAvatar(
+            radius: 17,
+            backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+            backgroundImage: auth.avatarUrl != null
+                ? NetworkImage(auth.avatarUrl!)
+                : null,
+            child: auth.avatarUrl == null
+                ? Text(
+                    auth.displayName.isNotEmpty
+                        ? auth.displayName[0].toUpperCase()
+                        : 'U',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: theme.colorScheme.primary,
+                    ),
+                  )
+                : null,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: FilledButton.tonalIcon(
+        onPressed: () => context.push('/login'),
+        icon: const Icon(Icons.login_rounded, size: 16),
+        label: const Text(
+          'Sign In',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
     );
   }
